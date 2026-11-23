@@ -1,0 +1,13 @@
+import { useEffect, useState } from "react";
+import { Activity, AlertTriangle, Ship, Cpu, Users, LifeBuoy, RefreshCw } from "lucide-react";
+import { adminRequest } from "../services/adminService";
+import type { DashboardSummary } from "./Dashboard";
+import "./AdminPages.css";
+const empty: DashboardSummary = { totalUsers: 0, activeUsers: 0, inactiveUsers: 0, adminCount: 0, staffCount: 0, totalBoats: 0, totalDevices: 0, openEmergencies: 0, openSupportTickets: 0 };
+export default function Analytics() {
+  const [data, setData] = useState(empty); const [loading, setLoading] = useState(true); const [error, setError] = useState("");
+  const load = async () => { setLoading(true); setError(""); try { setData(await adminRequest<DashboardSummary>("/dashboard/summary")); } catch (e) { setError(e instanceof Error ? e.message : "Unable to load analytics."); } finally { setLoading(false); } };
+  useEffect(() => { void load(); }, []);
+  const cards = [{ label: "Registered users", value: data.totalUsers, icon: Users }, { label: "Active users", value: data.activeUsers, icon: Activity }, { label: "Boats", value: data.totalBoats, icon: Ship }, { label: "Devices", value: data.totalDevices, icon: Cpu }, { label: "Open emergencies", value: data.openEmergencies, icon: AlertTriangle }, { label: "Open support tickets", value: data.openSupportTickets, icon: LifeBuoy }];
+  return <section className="admin-page"><header className="admin-page-heading"><div><p className="admin-eyebrow">OPERATIONS</p><h1>Analytics</h1><p>Live operational totals across your SeaLynQ platform.</p></div><button className="admin-button secondary" onClick={() => void load()} disabled={loading}><RefreshCw size={16}/> Refresh</button></header>{error && <p className="admin-error" role="alert">{error}</p>}{loading ? <p>Loading analytics…</p> : <><div className="admin-metric-grid">{cards.map(({ label, value, icon: Icon }) => <article className="admin-metric" key={label}><span><Icon size={19}/></span><div><p>{label}</p><strong>{value}</strong></div></article>)}</div><article className="admin-panel"><h2>Account composition</h2><div className="admin-bars">{[{ label: "Active", value: data.activeUsers, color: "#0d9488" }, { label: "Inactive", value: data.inactiveUsers, color: "#f59e0b" }, { label: "Admins", value: data.adminCount, color: "#6366f1" }, { label: "Staff", value: data.staffCount, color: "#0891b2" }].map(item => <div className="admin-bar-row" key={item.label}><span>{item.label}</span><div><i style={{ width: `${data.totalUsers ? Math.max(3, item.value / data.totalUsers * 100) : 0}%`, background: item.color }}/></div><strong>{item.value}</strong></div>)}</div><p className="admin-muted">Counts are calculated from current Firebase records.</p></article></>}</section>;
+}
