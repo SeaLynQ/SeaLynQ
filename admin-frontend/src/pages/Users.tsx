@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import { Search, RefreshCw, Users as UsersIcon } from "lucide-react";
 import { auth } from "../config/firebase";
 
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"
+).replace(/\/$/, "");
+
 interface User {
   uid: string;
   name?: string;
@@ -43,7 +47,7 @@ function Users() {
       const token = await currentUser.getIdToken();
 
       const response = await fetch(
-        "http://localhost:5000/api/users",
+        `${API_BASE_URL}/users`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -98,7 +102,7 @@ const updateUserStatus = async (user: User) => {
     const token = await currentUser.getIdToken();
 
     const response = await fetch(
-      `http://localhost:5000/api/users/${user.uid}/status`,
+      `${API_BASE_URL}/users/${user.uid}/status`,
       {
         method: "PATCH",
         headers: {

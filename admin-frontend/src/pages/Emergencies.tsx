@@ -15,6 +15,10 @@ import {
 import { auth } from "../config/firebase";
 import "./Emergencies.css";
 
+const API_BASE_URL = (
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"
+).replace(/\/$/, "");
+
 type EmergencyType =
     | "SOS"
     | "ENGINE_FAILURE"
@@ -65,7 +69,7 @@ interface EmergencyForm {
     longitude: string;
 }
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = API_BASE_URL;
 
 const emptyForm: EmergencyForm = {
     boatId: "",

@@ -5,7 +5,9 @@ import {
   Plus, Search, Pencil, Trash2, X, Cpu, RefreshCw
 } from "lucide-react";
 
-const API = "http://localhost:5000/api";
+const API = (
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"
+).replace(/\/$/, "");
 
 type Status = "ACTIVE" | "INACTIVE" | "MAINTENANCE";
 

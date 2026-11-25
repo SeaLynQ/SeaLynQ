@@ -19,6 +19,10 @@ import {
 import { auth } from "../config/firebase";
 import "./Notifications.css";
 
+const API_BASE_URL = (
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"
+).replace(/\/$/, "");
+
 type NotificationType =
     | "EMERGENCY"
     | "BOAT"
@@ -42,7 +46,7 @@ interface Notification {
     readAt: string | null;
 }
 
-const API_URL = "http://localhost:5000/api/notifications";
+const API_URL = `${API_BASE_URL}/notifications`;
 
 function formatDate(value: string): string {
     const date = new Date(value);

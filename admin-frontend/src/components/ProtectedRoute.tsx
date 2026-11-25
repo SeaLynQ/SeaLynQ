@@ -4,75 +4,79 @@ import { Navigate } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
 
+const API_BASE_URL = (
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"
+).replace(/\/$/, "");
+
 interface ProtectedRouteProps {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }
 
 function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const [authorized, setAuthorized] = useState(false);
-  const [checking, setChecking] = useState(true);
+    const [authorized, setAuthorized] = useState(false);
+    const [checking, setChecking] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        setAuthorized(false);
-        setChecking(false);
-        return;
-      }
-
-      try {
-        const token = await user.getIdToken();
-
-        const response = await fetch(
-          "http://localhost:5000/api/auth/me",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                setAuthorized(false);
+                setChecking(false);
+                return;
             }
-          }
-        );
 
-        const result = await response.json();
+            try {
+                const token = await user.getIdToken();
 
-        if (!response.ok) {
-          await signOut(auth);
-          setAuthorized(false);
-          return;
-        }
+                const response = await fetch(
+                    `${API_BASE_URL}/auth/me`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
 
-        if (
-          result.data?.role !== "ADMIN" ||
-          result.data?.status !== "ACTIVE"
-        ) {
-          await signOut(auth);
-          setAuthorized(false);
-          return;
-        }
+                const result = await response.json();
 
-        setAuthorized(true);
+                if (!response.ok) {
+                    await signOut(auth);
+                    setAuthorized(false);
+                    return;
+                }
 
-      } catch (error) {
-        console.error("Authorization check failed:", error);
-        await signOut(auth);
-        setAuthorized(false);
-      } finally {
-        setChecking(false);
-      }
-    });
+                if (
+                    result.data?.role !== "ADMIN" ||
+                    result.data?.status !== "ACTIVE"
+                ) {
+                    await signOut(auth);
+                    setAuthorized(false);
+                    return;
+                }
 
-    return () => unsubscribe();
-  }, []);
+                setAuthorized(true);
 
-  if (checking) {
-    return <p>Verifying administrator access...</p>;
-  }
+            } catch (error) {
+                console.error("Authorization check failed:", error);
+                await signOut(auth);
+                setAuthorized(false);
+            } finally {
+                setChecking(false);
+            }
+        });
 
-  if (!authorized) {
-    return <Navigate to="/" replace />;
-  }
+        return () => unsubscribe();
+    }, []);
 
-  return <>{children}</>;
+    if (checking) {
+        return <p>Verifying administrator access...</p>;
+    }
+
+    if (!authorized) {
+        return <Navigate to="/" replace />;
+    }
+
+    return <>{children}</>;
 }
 
 export default ProtectedRoute;

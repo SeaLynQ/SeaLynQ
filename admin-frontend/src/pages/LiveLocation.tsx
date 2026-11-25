@@ -10,6 +10,10 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { auth } from "../config/firebase";
 
+const API_BASE_URL = (
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"
+).replace(/\/$/, "");
+
 interface Boat {
     id: string;
     boatName: string;
@@ -85,10 +89,10 @@ function LiveLocation() {
 
                 const [boatsResponse, locationsResponse] =
                     await Promise.all([
-                        fetch("http://localhost:5000/api/boats", {
+                        fetch(`${API_BASE_URL}/boats`, {
                             headers
                         }),
-                        fetch("http://localhost:5000/api/locations", {
+                        fetch(`${API_BASE_URL}/locations`, {
                             headers
                         })
                     ]);
@@ -154,7 +158,7 @@ function LiveLocation() {
             const token = await user.getIdToken();
 
             const response = await fetch(
-                `http://localhost:5000/api/gps-simulator/${action}`,
+                `${API_BASE_URL}/gps-simulator/${action}`,
                 {
                     method: "POST",
                     headers: {
@@ -265,7 +269,7 @@ const saveBoatLocation = async () => {
         const token = await user.getIdToken();
 
         const response = await fetch(
-            "http://localhost:5000/api/locations",
+            `${API_BASE_URL}/locations`,
             {
                 method: "PUT",
                 headers: {

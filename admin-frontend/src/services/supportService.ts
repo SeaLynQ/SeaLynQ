@@ -1,7 +1,11 @@
 
 import { auth } from "../config/firebase";
 
-const API_URL = "http://localhost:5000/api/support";
+const API_BASE_URL = (
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"
+).replace(/\/$/, "");
+
+const API_URL = `${API_BASE_URL}/support`;
 
 export interface SupportTicket {
     id: string;
@@ -117,6 +121,7 @@ export const assignTicket = (
         method: "PATCH",
         body: JSON.stringify({ adminId })
     });
+
 export interface SupportUser {
     uid: string;
     name?: string;
@@ -134,7 +139,7 @@ export const getSupportUsers = async (): Promise<SupportUser[]> => {
 
     const token = await user.getIdToken();
 
-    const response = await fetch("http://localhost:5000/api/users", {
+    const response = await fetch(`${API_BASE_URL}/users`, {
         headers: {
             Authorization: `Bearer ${token}`
         }
