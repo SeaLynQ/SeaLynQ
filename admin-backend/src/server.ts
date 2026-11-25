@@ -59,6 +59,7 @@ app.use("/api/support", supportRoutes);
 app.use("/api/settings", settingsRoutes);
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`SeaLynQ backend running on http://localhost:${PORT}`);
+// Start server
+app.listen(Number(PORT), "0.0.0.0", () => {
+    console.log(`SeaLynQ backend running on port ${PORT}`);
 });
